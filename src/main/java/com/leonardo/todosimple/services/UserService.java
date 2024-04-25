@@ -19,6 +19,8 @@ import com.leonardo.todosimple.security.UserSpringSecurity;
 import com.leonardo.todosimple.services.exceptions.AuthorizationException;
 import com.leonardo.todosimple.services.exceptions.DataBindingViolationException;
 import com.leonardo.todosimple.services.exceptions.ObjectNotFoundException;
+import com.leonardo.todosimple.dto.UserCreateDTO;
+import com.leonardo.todosimple.dto.UserUpdateDTO;
 import com.leonardo.todosimple.models.User;
 import com.leonardo.todosimple.models.enums.ProfileEnum;
 
@@ -76,5 +78,19 @@ public class UserService {
     catch(Exception e){
       return null;
     }
+  }
+
+  public User fromDTO(@Valid UserCreateDTO obj){
+    User user = new User();
+    user.setUsername(obj.getUsername());
+    user.setPassword(obj.getPassword());
+    return user;
+  }
+
+  public User fromDTO(@Valid UserUpdateDTO obj){
+    User user = new User();
+    user.setId(obj.getId());
+    user.setPassword(obj.getPassword());
+    return user;
   }
 }
