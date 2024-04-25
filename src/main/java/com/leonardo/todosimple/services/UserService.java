@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.leonardo.todosimple.repositories.UserRepository;
+import com.leonardo.todosimple.security.UserSpringSecurity;
+import com.leonardo.todosimple.services.exceptions.AuthorizationException;
 import com.leonardo.todosimple.services.exceptions.DataBindingViolationException;
 import com.leonardo.todosimple.services.exceptions.ObjectNotFoundException;
 import com.leonardo.todosimple.models.User;
@@ -30,6 +32,10 @@ public class UserService {
   private UserRepository userRepository;
 
   public User findById(Long id){
+    UserSpringSecurity userSpringSecurity = authenticated();
+    if(!Objects.nonNull(userSpringSecurity) || !userSpringSecurity.hasRole(ProfileEnum.ADMIN) && !id.equals(userSpringSecurity.getId())){
+      throw new AuthorizationException("Acesso negado!");
+    }
     Optional<User> user = this.userRepository.findById(id);
     return user.orElseThrow(() -> new ObjectNotFoundException(
       "Usuário não encontrado! Id: " + id + ", Tipo: " + User.class.getName()
@@ -60,6 +66,15 @@ public class UserService {
     }
     catch(Exception e){
       throw new DataBindingViolationException("Não é possível excluir pois há entidades relacionadas!");
+    }
+  }
+
+  public static UserSpringSecurity authenticated(){
+    try{
+      return(UserSpringSecurity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+    catch(Exception e){
+      return null;
     }
   }
 }
